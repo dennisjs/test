@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <link rel="icon" href="https://img.icons8.com/?size=100&id=AojTOk8jMESD&format=png&color=000000" />
+  <title>My Southeast Asia Itinerary</title>
+  <link href="https://fonts.googleapis.com/css2?family=Shadows+Into+Light&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: linear-gradient(to bottom, #fdfcfb, #e2e2e2);
+    }
+    h2.timeline-title {
+      font-family: 'Shadows Into Light', cursive;
+      font-size: 2.5rem;
+      color: #000;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .day {
+      background: white;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .day.past {
+      opacity: 0.55;
+    }
+    .day h3 {
+      color: #33adff;
+      margin: 0 0 0.5rem 0;
+    }
+    .day p {
+      margin: 0.5rem 0;
+    }
+    ul.activities {
+      margin: 0.5rem 0 0 1.2rem;
+      padding-left: 1rem;
+    }
+    ul.activities li {
+      margin-bottom: 0.3rem;
+    }
+    .back-link {
+      display: block;
+      margin-bottom: 1.5rem;
+      color: #33adff;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">← Back to Main Page</a>
+  <h2 class="timeline-title">Itinerary Outline</h2>
+  <div id="itinerary-container">Loading itinerary...</div>
+
+  <script>
+    async function loadItinerary() {
+      try {
+        const response = await fetch('itinerary.json');
+        const data = await response.json();
+        const container = document.getElementById('itinerary-container');
+        container.innerHTML = '';
+
+        data.forEach(entry => {
+          const start = new Date(entry.arrival_date);
+          const end = new Date(start);
+          end.setDate(end.getDate() + entry.nights);
+
+          const options = { month: 'short', day: 'numeric' };
+          const range = `${start.toLocaleDateString('en-US', options)} – ${end.toLocaleDateString('en-US', options)}`;
+
+          const div = document.createElement('div');
+          const now = new Date();
+          const isPast = end < now;
+          div.className = 'day' + (isPast ? ' past' : '');
+
+
+          div.innerHTML = `
+            <h3>${range}: ${entry.location}, ${entry.country}</h3>
+            ${entry.arrival_method ? `<p><strong>Arrival:</strong> ${entry.arrival_method} (${entry.journey_time})</p>` : ''}
+            <ul class="activities">
+              ${entry.activities.map(item => `<li>${item}</li>`).join('')}
+            </ul>
+          `;
+          container.appendChild(div);
+        });
+      } catch (err) {
+        document.getElementById('itinerary-container').innerHTML = '<p>Failed to load itinerary data.</p>';
+        console.error('Error loading itinerary:', err);
+      }
+    }
+
+    loadItinerary();
+  </script>
+</body>
+</html>
